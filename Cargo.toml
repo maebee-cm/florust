@@ -1,0 +1,9 @@
+[workspace]
+
+resolver = "2"
+
+members = [
+    "florust_server",
+    "florust_client",
+    "florust_common"
+]
