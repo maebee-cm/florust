@@ -1,4 +1,4 @@
-# Florust Server
+# Florust
 
 ## Like flora, or a florist, but like, y'know, with Rust
 
