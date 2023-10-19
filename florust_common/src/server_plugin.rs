@@ -4,7 +4,7 @@ use crate::server_data_source_error::DataSourceManagerError;
 
 #[async_trait]
 pub trait DataSourceManager: Sync + Send {
-    fn data_source_type(&self) -> &'static str;
+    fn manager_id(&self) -> &'static str;
 
     fn data_type_length(&self) -> usize;
 
