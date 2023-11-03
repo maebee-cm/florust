@@ -7,7 +7,3 @@ pub mod server_data_source_error;
 pub struct UploadedData {
     pub data: Vec<u8>
 }
-
-#[cfg(test)]
-mod tests {
-}
