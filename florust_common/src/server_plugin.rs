@@ -23,13 +23,13 @@ pub trait DataSourceManager<T>: Sync + Send {
     /// Optionally provides info sent with the registration request by the data source.
     /// 
     /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
-    fn register(&self, id: String, data: Option<&[u8]>) -> Result<()>;
+    async fn register(&self, id: String, data: Option<&[u8]>) -> Result<()>;
 
     /// Called when a data source requests to be deregistered from the data source manager. Optionally
     /// provides info sent with the deregistration request by the data source.
     /// 
     /// Returns the unit type if no errors occurred or a [`DataSourceManagerError`] in case of an error.
-    fn deregister(&self, id: &str, data: Option<&[u8]>) -> Result<()>;
+    async fn deregister(&self, id: &str, data: Option<&[u8]>) -> Result<()>;
 
     /// Called when a data source has posted an update. provides the raw data that the data source
     /// has sent to the Florust server.
