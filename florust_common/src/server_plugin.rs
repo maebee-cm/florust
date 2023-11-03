@@ -5,6 +5,10 @@ use crate::server_data_source_error::DataSourceManagerError;
 #[async_trait]
 pub trait DataSourceManager: Sync + Send {
     fn manager_id(&self) -> &'static str;
+
+    fn register(&self, id: String, data: Option<&[u8]>) -> Result<(), DataSourceManagerError>;
+
+    fn unregister(&self, id: &str, data: Option<&[u8]>) -> Result<(), DataSourceManagerError>;
 }
 
 #[async_trait]
