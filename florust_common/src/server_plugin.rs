@@ -6,15 +6,28 @@ use crate::server_data_source_error::DataSourceManagerError;
 pub trait DataSourceManager: Sync + Send {
     fn manager_id(&self) -> &'static str;
 
-    fn data_type_length(&self) -> usize;
-
     async fn register(&self, id: String) -> Result<(), DataSourceManagerError>;
 
     async fn unregister(&self, id: &str) -> Result<(), DataSourceManagerError>;
-
-    async fn update_data(&self, id: &str, data: &[u8]) -> Result<(), DataSourceManagerError>;
-
-    async fn get_data(&self, id: &str, out: &mut [u8]) -> Result<(), DataSourceManagerError>;
 }
 
-pub type CreateAtomicDataSourceManager = unsafe extern fn() -> Box<Box<dyn DataSourceManager>>;
+#[async_trait]
+pub trait IIntegerDataSourceManager: DataSourceManager + Sync + Send {
+    async fn update_data(&self, id: &str, data: &[u8]) -> Result<i64, DataSourceManagerError>;
+}
+
+#[async_trait]
+pub trait UIntegerDataSourceManager: DataSourceManager + Sync + Send {
+    async fn update_data(&self, id: &str, data: &[u8]) -> Result<u64, DataSourceManagerError>;
+}
+
+#[async_trait]
+pub trait FloatDataSourceManager: DataSourceManager + Sync + Send {
+    async fn update_data(&self, id: &str, data: &[u8]) -> Result<f64, DataSourceManagerError>;
+}
+
+pub type FFIBoxTrait<T> = Box<Box<T>>;
+
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn IIntegerDataSourceManager>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn UIntegerDataSourceManager>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn FloatDataSourceManager>;
