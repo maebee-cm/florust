@@ -28,6 +28,6 @@ pub trait FloatDataSourceManager: DataSourceManager + Sync + Send {
 
 pub type FFIBoxTrait<T> = Box<Box<T>>;
 
-pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn IIntegerDataSourceManager>;
-pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn UIntegerDataSourceManager>;
-pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn FloatDataSourceManager>;
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> Option<FFIBoxTrait<dyn IIntegerDataSourceManager>>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> Option<FFIBoxTrait<dyn UIntegerDataSourceManager>>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> Option<FFIBoxTrait<dyn FloatDataSourceManager>>;
