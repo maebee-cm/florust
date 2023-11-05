@@ -58,6 +58,13 @@ impl FlorustState {
                 .deregister(data_source_id).await
         }
     }
+
+    pub async fn update_data(&self, manager_id: &str, data_source_id: &str, data: &[u8]) -> server_plugin::Result<()> {
+        self.managers_and_data
+            .get(manager_id)
+            .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+            .update_data(data_source_id, data).await
+    }
 }
 
 #[launch]
