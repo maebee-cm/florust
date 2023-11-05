@@ -11,4 +11,3 @@ rocket_dyn_templates = { version = "0.1.0-rc.3", features = ["tera"] }
 serde_json = "1.0.107"
 tera = "1.19.1"
 florust_common = { path = "../florust_common/" }
-atomic_float = "0.1.0"
