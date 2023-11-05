@@ -5,7 +5,7 @@ mod manager_and_data;
 use rocket::{launch, routes};
 use std::{collections::HashMap, sync::Arc};
 
-use florust_common::server_data_source_error::DataSourceManagerError;
+use florust_common::{server_data_source_error::DataSourceManagerError, server_plugin};
 
 type ManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
 
@@ -29,7 +29,7 @@ impl FlorustState {
             .and_then(|v| Some(v))
     }
 
-    pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> Result<(), DataSourceManagerError> {
+    pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> server_plugin::Result<()> {
         if let Some(data) = data {
             self.managers_and_data
                 .get(manager_id)
@@ -44,7 +44,7 @@ impl FlorustState {
         }
     }
 
-    pub async fn deregister_data_source(&self, manager_id: &str, data_source_id: &str, data: Option<&[u8]>) -> Result<(), DataSourceManagerError> {
+    pub async fn deregister_data_source(&self, manager_id: &str, data_source_id: &str, data: Option<&[u8]>) -> server_plugin::Result<()> {
         if let Some(data) = data {
             self.managers_and_data
                 .get(manager_id)
