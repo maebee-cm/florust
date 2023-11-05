@@ -59,7 +59,7 @@ impl<T> CircularVec<T> {
             self.start += 1;
 
             if self.start == self.max_size {
-                self.start == 0;
+                self.start = 0;
             }
         }
     }
