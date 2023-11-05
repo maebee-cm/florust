@@ -5,13 +5,13 @@ use rocket::{async_trait, tokio::sync::RwLock};
 
 use crate::circular_vec::CircularVec;
 
-enum DataSourceStatus<T> {
+enum DataSourceStatus<T> where T: Send + Sync {
     RegisteredNoData,
     RegisteredWithData(CircularVec<T>),
     Deregistered
 }
 
-impl<T> DataSourceStatus<T> {
+impl<T> DataSourceStatus<T> where T: Send + Sync {
     fn is_deregistered(&self) -> bool {
         if let DataSourceStatus::Deregistered = self {
             true
@@ -35,9 +35,13 @@ type FloatLoggedData = LoggedData<f64>;
 
 #[async_trait]
 pub trait ManagerAndData: Send + Sync {
-    async fn register(&self, id: String, data: Option<&[u8]>) -> server_plugin::Result<()>;
+    async fn register(&self, id: String) -> server_plugin::Result<()>;
 
-    async fn deregister(&self, id: &str, data: Option<&[u8]>) -> server_plugin::Result<()>;
+    async fn register_with_data(&self, id: String, data: &[u8]) -> server_plugin::Result<()>;
+
+    async fn deregister(&self, id: &str) -> server_plugin::Result<()>;
+
+    async fn deregister_with_data(&self, id: &str, data: &[u8]) -> server_plugin::Result<()>;
 
     async fn update_data(&self, id: &str, data: &[u8]) -> server_plugin::Result<()>;
 }
@@ -74,27 +78,47 @@ macro_rules! manager_and_data_impl {
 
         #[async_trait]
         impl ManagerAndData for $impl_for {
-            async fn register(&self, id: String, data: Option<&[u8]>) -> server_plugin::Result<()> {
+            async fn register(&self, id: String) -> server_plugin::Result<()> {
                 let lock = self.logged_data.write().await;
 
                 if let Some(data_source) = lock.get(&id) {
                     let data_source = data_source.write().await;
-                    if data_source.is_deregistered() {
+                    if !data_source.is_deregistered() {
                         return Err(DataSourceManagerError::IdAlreadyExists);
                     }
 
-                    self.manager.register(id, data).await?;
+                    self.manager.register(id).await?;
                     *data_source = DataSourceStatus::RegisteredNoData;
                 }
                 else {
-                    self.manager.register(id, data).await?;
+                    self.manager.register(id).await?;
                     lock.insert(id, RwLock::new(DataSourceStatus::RegisteredNoData));
                 }
 
                 Ok(())
             }
 
-            async fn deregister(&self, id: &str, data: Option<&[u8]>) -> server_plugin::Result<()> {
+            async fn register_with_data(&self, id: String, data: &[u8]) -> server_plugin::Result<()> {
+                let lock = self.logged_data.write().await;
+
+                if let Some(data_source) = lock.get(&id) {
+                    let data_source = data_source.write().await;
+                    if !data_source.is_deregistered() {
+                        return Err(DataSourceManagerError::IdAlreadyExists);
+                    }
+
+                    self.manager.register_with_data(id, data).await?;
+                    *data_source = DataSourceStatus::RegisteredNoData;
+                }
+                else {
+                    self.manager.register_with_data(id, data).await?;
+                    lock.insert(id, RwLock::new(DataSourceStatus::RegisteredNoData));
+                }
+
+                Ok(())
+            }
+
+            async fn deregister(&self, id: &str) -> server_plugin::Result<()> {
                 let lock = self.logged_data.read().await;
                 
                 let data_source = lock
@@ -103,7 +127,30 @@ macro_rules! manager_and_data_impl {
                     .write()
                     .await;
 
-                self.manager.deregister(id, data).await?;
+                if data_source.is_deregistered() {
+                    return Err(DataSourceManagerError::IdDoesntExist);
+                }
+
+                self.manager.deregister(id).await?;
+                *data_source = DataSourceStatus::Deregistered;
+
+                Ok(())
+            }
+
+            async fn deregister_with_data(&self, id: &str, data: &[u8]) -> server_plugin::Result<()> {
+                let lock = self.logged_data.read().await;
+                
+                let data_source = lock
+                    .get_mut(id)
+                    .ok_or(DataSourceManagerError::IdDoesntExist)?
+                    .write()
+                    .await;
+
+                if data_source.is_deregistered() {
+                    return Err(DataSourceManagerError::IdDoesntExist);
+                }
+
+                self.manager.deregister_with_data(id, data).await?;
                 *data_source = DataSourceStatus::Deregistered;
 
                 Ok(())
