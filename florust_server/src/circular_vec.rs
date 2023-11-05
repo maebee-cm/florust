@@ -31,7 +31,7 @@ impl<T> CircularVec<T> {
     }
 
 
-    pub fn insert(&mut self, val: T) {
+    pub fn append(&mut self, val: T) {
         self.vec[self.end] = val;
         self.increment_range();
     }
