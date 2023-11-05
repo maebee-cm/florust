@@ -8,6 +8,8 @@ use crate::FlorustState;
 
 #[derive(Responder)]
 pub enum DataSourceError {
+    #[response(status = 400, content_type = "json")]
+    BadRequest(String),
     #[response(status = 404, content_type = "json")]
     NotFound(String),
     #[response(status = 409, content_type = "json")]
@@ -16,14 +18,18 @@ pub enum DataSourceError {
 
 impl From<DataSourceManagerError> for DataSourceError {
     fn from(value: DataSourceManagerError) -> Self {
-        match value {
+        match &value {
+            DataSourceManagerError::DataSourceParseFailure(_) => Self::BadRequest(
+                serde_json::to_string(&value)
+                    .expect("Failed to serialize valid DataSourceManagerError")
+            ),
             DataSourceManagerError::IdAlreadyExists => Self::Conflict(
                 serde_json::to_string(&value)
                     .expect("Failed to serialize valid DataSourceManagerError")
             ),
             DataSourceManagerError::IdDoesntExist | DataSourceManagerError::DataSourceManagerDoesntExist => {
                 Self::NotFound(serde_json::to_string(&value)
-                    .expect("Failed to serialize valid DataSoucreManagerError")
+                    .expect("Failed to serialize valid DataSourceManagerError")
                 )
             },
         }
