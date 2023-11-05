@@ -30,10 +30,33 @@ impl FlorustState {
     }
 
     pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> Result<(), DataSourceManagerError> {
-        self.managers_and_data
-            .get(manager_id)
-            .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
-            .register(data_source_id, data).await
+        if let Some(data) = data {
+            self.managers_and_data
+                .get(manager_id)
+                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .register_with_data(data_source_id, data).await
+        }
+        else {
+            self.managers_and_data
+                .get(manager_id)
+                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .register(data_source_id).await
+        }
+    }
+
+    pub async fn deregister_data_source(&self, manager_id: &str, data_source_id: &str, data: Option<&[u8]>) -> Result<(), DataSourceManagerError> {
+        if let Some(data) = data {
+            self.managers_and_data
+                .get(manager_id)
+                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .deregister_with_data(data_source_id, data).await
+        }
+        else {
+            self.managers_and_data
+                .get(manager_id)
+                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .deregister(data_source_id).await
+        }
     }
 }
 
