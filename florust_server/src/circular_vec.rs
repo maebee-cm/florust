@@ -18,19 +18,6 @@ impl<T> CircularVec<T> {
         }
     }
 
-    pub fn with_initial(max_size: usize, initial_value: T) -> CircularVec<T>
-    where
-        T: Clone,
-    {
-        CircularVec {
-            vec: vec![initial_value; max_size],
-            start: 0,
-            end: 0,
-            max_size
-        }
-    }
-
-
     pub fn append(&mut self, val: T) {
         self.vec[self.end] = val;
         self.increment_range();
