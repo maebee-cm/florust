@@ -1,35 +1,54 @@
+mod circular_vec;
 mod data_source;
+mod manager_and_data;
 
-use std::{collections::HashMap, sync::Arc};
 use rocket::{launch, routes};
+use std::{collections::HashMap, sync::Arc};
 
-use florust_common::server_plugin::DataSourceManager;
+use florust_common::server_data_source_error::DataSourceManagerError;
+
+type ManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
 
 pub struct FlorustState {
-    managers: Arc<HashMap<&'static str, Box<dyn DataSourceManager>>>
+    managers_and_data: Arc<
+        HashMap<
+            &'static str,
+            ManagerAndData,
+        >,
+    >,
 }
 
 impl FlorustState {
     pub fn manager_exists(&self, manager_id: &str) -> bool {
-        self.managers.contains_key(manager_id)
+        self.managers_and_data.contains_key(manager_id)
     }
 
-    pub fn get_manager(&self, manager_id: &str) -> Option<&Box<dyn DataSourceManager>> {
-        self.managers.get(manager_id)
+    pub fn get_manager(&self, manager_id: &str) -> Option<&ManagerAndData> {
+        self.managers_and_data
+            .get(manager_id)
+            .and_then(|v| Some(v))
+    }
+
+    pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> Result<(), DataSourceManagerError> {
+        self.managers_and_data
+            .get(manager_id)
+            .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+            .register(data_source_id, data).await
     }
 }
 
 #[launch]
 fn launch() -> _ {
     let florust_state = FlorustState {
-        managers: Arc::new(HashMap::new())
+        managers_and_data: Arc::new(HashMap::new()),
     };
 
-    rocket::build()
-        .manage(florust_state)
-        .mount("/data_source", routes![
+    rocket::build().manage(florust_state).mount(
+        "/data_source",
+        routes![
             data_source::register,
             data_source::unregister,
             data_source::upload_data
-        ])
+        ],
+    )
 }
