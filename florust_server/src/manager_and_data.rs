@@ -79,10 +79,10 @@ macro_rules! manager_and_data_impl {
         #[async_trait]
         impl ManagerAndData for $impl_for {
             async fn register(&self, id: String) -> server_plugin::Result<()> {
-                let lock = self.logged_data.write().await;
+                let mut lock = self.logged_data.write().await;
 
                 if let Some(data_source) = lock.get(&id) {
-                    let data_source = data_source.write().await;
+                    let mut data_source = data_source.write().await;
                     if !data_source.is_deregistered() {
                         return Err(DataSourceManagerError::IdAlreadyExists);
                     }
@@ -91,7 +91,7 @@ macro_rules! manager_and_data_impl {
                     *data_source = DataSourceStatus::RegisteredNoData;
                 }
                 else {
-                    self.manager.register(id).await?;
+                    self.manager.register(id.clone()).await?;
                     lock.insert(id, RwLock::new(DataSourceStatus::RegisteredNoData));
                 }
 
@@ -99,10 +99,10 @@ macro_rules! manager_and_data_impl {
             }
 
             async fn register_with_data(&self, id: String, data: &[u8]) -> server_plugin::Result<()> {
-                let lock = self.logged_data.write().await;
+                let mut lock = self.logged_data.write().await;
 
                 if let Some(data_source) = lock.get(&id) {
-                    let data_source = data_source.write().await;
+                    let mut data_source = data_source.write().await;
                     if !data_source.is_deregistered() {
                         return Err(DataSourceManagerError::IdAlreadyExists);
                     }
@@ -111,7 +111,7 @@ macro_rules! manager_and_data_impl {
                     *data_source = DataSourceStatus::RegisteredNoData;
                 }
                 else {
-                    self.manager.register_with_data(id, data).await?;
+                    self.manager.register_with_data(id.clone(), data).await?;
                     lock.insert(id, RwLock::new(DataSourceStatus::RegisteredNoData));
                 }
 
@@ -121,8 +121,8 @@ macro_rules! manager_and_data_impl {
             async fn deregister(&self, id: &str) -> server_plugin::Result<()> {
                 let lock = self.logged_data.read().await;
                 
-                let data_source = lock
-                    .get_mut(id)
+                let mut data_source = lock
+                    .get(id)
                     .ok_or(DataSourceManagerError::IdDoesntExist)?
                     .write()
                     .await;
@@ -140,8 +140,8 @@ macro_rules! manager_and_data_impl {
             async fn deregister_with_data(&self, id: &str, data: &[u8]) -> server_plugin::Result<()> {
                 let lock = self.logged_data.read().await;
                 
-                let data_source = lock
-                    .get_mut(id)
+                let mut data_source = lock
+                    .get(id)
                     .ok_or(DataSourceManagerError::IdDoesntExist)?
                     .write()
                     .await;
@@ -159,19 +159,19 @@ macro_rules! manager_and_data_impl {
             async fn update_data(&self, id: &str, data: &[u8]) -> server_plugin::Result<()> {
                 let lock = self.logged_data.read().await;
 
-                let data_source = lock
-                    .get_mut(id)
+                let mut data_source = lock
+                    .get(id)
                     .ok_or(DataSourceManagerError::IdDoesntExist)?
                     .write()
                     .await;
 
                 let val = self.manager.update_data(id, data).await?;
 
-                match *data_source {
+                match &mut *data_source {
                     DataSourceStatus::RegisteredNoData => {
-                        let logged_data = CircularVec::new(self.max_logged_data_size);
+                        let mut logged_data = CircularVec::new(self.max_logged_data_size);
                         logged_data.append(val);
-                        *data_source = DataSourceStatus::RegisteredWithData(logged_data)
+                        *data_source = DataSourceStatus::RegisteredWithData(logged_data);
                     },
                     DataSourceStatus::RegisteredWithData(logged_data) => {
                         logged_data.append(val);
