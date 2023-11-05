@@ -20,16 +20,26 @@ pub trait DataSourceManager<T>: Sync + Send {
     fn manager_id(&self) -> &'static str;
 
     /// Called when a new data source registers itself to the id belonging to the data source manager.
-    /// Optionally provides info sent with the registration request by the data source.
     /// 
     /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
-    async fn register(&self, id: String, data: Option<&[u8]>) -> Result<()>;
+    async fn register(&self, id: String) -> Result<()>;
 
-    /// Called when a data source requests to be deregistered from the data source manager. Optionally
-    /// provides info sent with the deregistration request by the data source.
+    /// Called when a new data source registers itself to the id belonging to the data source manager.
+    /// This method is chosen if the data source provided additional info with the registration request.
+    /// 
+    /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
+    async fn register_with_data(&self, id: String, data: &[u8]) -> Result<()>;
+
+    /// Called when a data source requests to be deregistered from the data source manager.
     /// 
     /// Returns the unit type if no errors occurred or a [`DataSourceManagerError`] in case of an error.
-    async fn deregister(&self, id: &str, data: Option<&[u8]>) -> Result<()>;
+    async fn deregister(&self, id: &str) -> Result<()>;
+
+    /// Called when a data source requests to be deregistered from the data source manager. This method
+    /// is chosen if the data source provided additional info with the deregistration request.
+    /// 
+    /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
+    async fn deregister_with_data(&self, id: &str, data: &[u8]) -> Result<()>;
 
     /// Called when a data source has posted an update. provides the raw data that the data source
     /// has sent to the Florust server.
