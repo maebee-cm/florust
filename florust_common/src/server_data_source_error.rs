@@ -13,4 +13,6 @@ pub enum DataSourceManagerError {
     IdDoesntExist,
     #[error("Attempted to interact with data source manager, but manager doesn't exist")]
     DataSourceManagerDoesntExist,
+    #[error("Failed to parse data provided to data source: {0}")]
+    DataSourceParseFailure(String)
 }
