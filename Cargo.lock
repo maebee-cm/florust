@@ -399,6 +399,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "florust_client"
+version = "0.1.0"
+
+[[package]]
 name = "florust_common"
 version = "0.1.0"
 dependencies = [
@@ -406,13 +410,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
-]
-
-[[package]]
-name = "florust_data_source"
-version = "0.1.0"
-dependencies = [
- "hyper",
 ]
 
 [[package]]
