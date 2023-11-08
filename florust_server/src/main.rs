@@ -2,10 +2,11 @@ mod circular_vec;
 mod data_source;
 mod manager_and_data;
 
+use manager_and_data::ManagerAndDataError;
 use rocket::{launch, routes};
 use std::{collections::HashMap, sync::Arc};
 
-use florust_common::{server_data_source_error::DataSourceManagerError, server_plugin};
+use florust_common::FlorustServerPluginError;
 
 type ManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
 
@@ -29,40 +30,65 @@ impl FlorustState {
             .and_then(|v| Some(v))
     }
 
-    pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> server_plugin::Result<()> {
+    pub async fn register_data_source(&self, manager_id: &str, data_source_id: String, data: Option<&[u8]>) -> manager_and_data::Result<()> {
         if let Some(data) = data {
             self.managers_and_data
                 .get(manager_id)
-                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .ok_or(
+                    ManagerAndDataError::DataSourceManager(
+                            FlorustServerPluginError::DataSourceManagerDoesntExist(manager_id.to_string()
+                        )
+                    )
+                )?
                 .register_with_data(data_source_id, data).await
         }
         else {
             self.managers_and_data
                 .get(manager_id)
-                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .ok_or(
+                    ManagerAndDataError::DataSourceManager(
+                            FlorustServerPluginError::DataSourceManagerDoesntExist(manager_id.to_string()
+                        )
+                    )
+                )?
                 .register(data_source_id).await
         }
     }
 
-    pub async fn deregister_data_source(&self, manager_id: &str, data_source_id: &str, data: Option<&[u8]>) -> server_plugin::Result<()> {
+    pub async fn deregister_data_source(&self, manager_id: &str, data_source_id: &str, data: Option<&[u8]>) -> manager_and_data::Result<()> {
         if let Some(data) = data {
             self.managers_and_data
                 .get(manager_id)
-                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .ok_or(
+                    ManagerAndDataError::DataSourceManager(
+                            FlorustServerPluginError::DataSourceManagerDoesntExist(manager_id.to_string()
+                        )
+                    )
+                )?
                 .deregister_with_data(data_source_id, data).await
         }
         else {
             self.managers_and_data
                 .get(manager_id)
-                .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+                .ok_or(
+                    ManagerAndDataError::DataSourceManager(
+                            FlorustServerPluginError::DataSourceManagerDoesntExist(manager_id.to_string()
+                        )
+                    )
+                )?
                 .deregister(data_source_id).await
         }
     }
 
-    pub async fn update_data(&self, manager_id: &str, data_source_id: &str, data: &[u8]) -> server_plugin::Result<()> {
+    pub async fn update_data(&self, manager_id: &str, data_source_id: &str, data: &[u8]) -> manager_and_data::Result<()> {
         self.managers_and_data
             .get(manager_id)
-            .ok_or(DataSourceManagerError::DataSourceManagerDoesntExist)?
+            .ok_or(
+                ManagerAndDataError::DataSourceManager(
+                        FlorustServerPluginError::DataSourceManagerDoesntExist(manager_id.to_string()
+                    )
+                )
+            )?
             .update_data(data_source_id, data).await
     }
 }
