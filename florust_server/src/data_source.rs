@@ -1,18 +1,18 @@
 use florust_common::{UploadedData, FlorustServerPluginError};
-use rocket::{form::Form, post, put, Responder, State};
+use rocket::{form::Form, post, put, Responder, State, serde::json::Json};
 
-use crate::{FlorustState, manager_and_data::ManagerAndDataError};
+use crate::{FlorustState, manager_and_data::{ManagerAndDataError, self}};
 
 #[derive(Responder)]
 pub enum DataSourceError {
     #[response(status = 400, content_type = "json")]
-    BadRequest(String),
+    BadRequest(Json<ManagerAndDataError>),
     #[response(status = 404, content_type = "json")]
-    NotFound(String),
+    NotFound(Json<ManagerAndDataError>),
     #[response(status = 409, content_type = "json")]
-    Conflict(String),
+    Conflict(Json<ManagerAndDataError>),
     #[response(status = 500, content_type = "json")]
-    InternalError(String)
+    InternalError(Json<ManagerAndDataError>)
 }
 
 impl From<ManagerAndDataError> for DataSourceError {
@@ -20,25 +20,20 @@ impl From<ManagerAndDataError> for DataSourceError {
         match &value {
             ManagerAndDataError::DataSourceManager(error) => match error {
                 FlorustServerPluginError::DataSourceAlreadyExists(_) | FlorustServerPluginError::DataSourceAlreadyDeregistered(_) => Self::Conflict(
-                    serde_json::to_string(&value)
-                        .expect("Failed to serialize valid ManagerAndDataError")
+                    Json(value)
                 ),
                 FlorustServerPluginError::DataSourceDoesntExist(_) | FlorustServerPluginError::DataSourceManagerDoesntExist(_)=> Self::NotFound(
-                    serde_json::to_string(&value)
-                        .expect("Failed to serialize valid ManagerAndDataError")
+                    Json(value)
                 ),
                 FlorustServerPluginError::DataSourceManager(_) => Self::BadRequest(
-                    serde_json::to_string(&value)
-                        .expect("Failed to serialize valid ManagerAndDataError")
+                    Json(value)
                 ),
             },
             ManagerAndDataError::NoData => Self::InternalError(
-                serde_json::to_string(&value)
-                    .expect("Failed to serialize valid ManagerAndDataError")
+                Json(value)
             ),
             ManagerAndDataError::IndexOutOfBounds => Self::InternalError(
-                serde_json::to_string(&value)
-                    .expect("Failed to serialize valid ManagerAndDataError")
+                Json(value)
             ),
         }
     }
@@ -46,7 +41,12 @@ impl From<ManagerAndDataError> for DataSourceError {
 
 #[derive(Responder)]
 #[response(status = 200)]
-pub struct OkResponder<T>(T) where T: Send + Sync;
+pub struct OkResponder<T>(Json<T>) where T: Send + Sync;
+
+fn state_op_to_responder<T: Send + Sync>(op_result: manager_and_data::Result<T>) -> Result<OkResponder<T>, DataSourceError> {
+    op_result.map(|value| OkResponder(Json(value)))
+        .map_err(DataSourceError::from)
+}
 
 #[post("/register/<manager_id>/<data_source_id>", data = "<data>")]
 pub async fn register(
@@ -55,16 +55,12 @@ pub async fn register(
     data_source_id: String,
     data: Option<Form<UploadedData>>
 ) -> Result<OkResponder<()>, DataSourceError> {
-    if let Some(data) = data {
-        state.register_data_source(&manager_id, data_source_id, Some(data.data.as_slice())).await
-            .map(OkResponder)
-            .map_err(DataSourceError::from)
-    }
-    else {
-        state.register_data_source(&manager_id, data_source_id, None).await
-            .map(OkResponder)
-            .map_err(DataSourceError::from)
-    }
+    let data = match &data {
+        Some(data) => Some(data.data.as_slice()),
+        None => None
+    };
+
+    state_op_to_responder(state.register_data_source(&manager_id, data_source_id, data).await)
 }
 
 #[post("/unregister/<manager_id>/<data_source_id>", data = "<data>")]
@@ -74,16 +70,12 @@ pub async fn unregister(
     data_source_id: String,
     data: Option<Form<UploadedData>>
 ) -> Result<OkResponder<()>, DataSourceError> {
-    if let Some(data) = data {
-        state.deregister_data_source(&manager_id, &data_source_id, Some(data.data.as_slice())).await
-            .map(OkResponder)
-            .map_err(DataSourceError::from)
-    }
-    else {
-        state.deregister_data_source(&manager_id, &data_source_id, None).await
-            .map(OkResponder)
-            .map_err(DataSourceError::from)
-    }
+    let data = match &data {
+        Some(data) => Some(data.data.as_slice()),
+        None => None
+    };
+
+    state_op_to_responder(state.deregister_data_source(&manager_id, &data_source_id, data).await)
 }
 
 #[put("/upload_data/<manager_id>/<data_source_id>", data = "<data>")]
@@ -93,7 +85,6 @@ pub async fn upload_data(
     data_source_id: String,
     data: Form<UploadedData>,
 ) -> Result<OkResponder<()>, DataSourceError> {
-    state.update_data(&manager_id, &data_source_id, data.data.as_slice()).await
-        .map(OkResponder)
-        .map_err(DataSourceError::from)
+
+    state_op_to_responder(state.update_data(&manager_id, &data_source_id, data.data.as_slice()).await)
 }
