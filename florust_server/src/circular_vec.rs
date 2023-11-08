@@ -23,7 +23,7 @@ impl<T> CircularVec<T> {
         self.increment_range();
     }
 
-    pub fn get(&mut self, index: usize) -> Option<&T> {
+    pub fn get(&self, index: usize) -> Option<&T> {
         let index = self.start + index;
         let index = if index >= self.max_size {
             index - self.max_size
