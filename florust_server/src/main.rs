@@ -8,13 +8,13 @@ use std::{collections::HashMap, sync::Arc};
 
 use florust_common::FlorustServerPluginError;
 
-type ManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
+type BoxedManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
 
 pub struct FlorustState {
     managers_and_data: Arc<
         HashMap<
             &'static str,
-            ManagerAndData,
+            BoxedManagerAndData,
         >,
     >,
 }
@@ -24,7 +24,7 @@ impl FlorustState {
         self.managers_and_data.contains_key(manager_id)
     }
 
-    pub fn get_manager(&self, manager_id: &str) -> Option<&ManagerAndData> {
+    pub fn get_manager(&self, manager_id: &str) -> Option<&BoxedManagerAndData> {
         self.managers_and_data
             .get(manager_id)
             .and_then(|v| Some(v))
