@@ -4,6 +4,6 @@ resolver = "2"
 
 members = [
     "florust_server",
-    "florust_data_source",
+    "florust_client",
     "florust_common"
 ]
