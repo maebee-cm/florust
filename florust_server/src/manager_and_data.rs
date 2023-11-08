@@ -110,7 +110,7 @@ macro_rules! manager_and_data_impl {
         #[async_trait]
         impl ManagerAndData for $impl_for {
             fn manager_id(&self) -> &'static str {
-                self.manager_id()
+                self.manager.manager_id()
             }
 
             async fn register(&self, id: String) -> Result<()> {
