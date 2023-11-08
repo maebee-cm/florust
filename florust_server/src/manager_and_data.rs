@@ -46,7 +46,7 @@ enum DataType {
 }
 
 #[derive(Error, Debug)]
-enum ManagerAndDataError {
+pub enum ManagerAndDataError {
     #[error("Data source manager returned error: {0}")]
     DataSourceManager(FlorustServerPluginError),
     #[error("Attempted to access data from a data source but it has no reported data")]
