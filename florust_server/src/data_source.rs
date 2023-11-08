@@ -79,7 +79,18 @@ pub async fn unregister(
 }
 
 #[put("/upload_data/<manager_id>/<data_source_id>", data = "<data>")]
-pub async fn upload_data(
+pub async fn json_upload_data(
+    state: &State<FlorustState>,
+    manager_id: String,
+    data_source_id: String,
+    data: Json<UploadedData>,
+) -> Result<OkResponder<()>, DataSourceError> {
+
+    state_op_to_responder(state.update_data(&manager_id, &data_source_id, data.data.as_slice()).await)
+}
+
+#[put("/upload_data/<manager_id>/<data_source_id>", data = "<data>")]
+pub async fn form_upload_data(
     state: &State<FlorustState>,
     manager_id: String,
     data_source_id: String,
