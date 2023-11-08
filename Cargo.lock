@@ -424,6 +424,7 @@ dependencies = [
  "rocket_dyn_templates",
  "serde_json",
  "tera",
+ "thiserror",
 ]
 
 [[package]]
