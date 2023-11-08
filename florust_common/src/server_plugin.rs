@@ -1,8 +1,16 @@
 use std::result;
 
 use rocket::async_trait;
+use serde::{Serialize, Deserialize};
+use thiserror::Error;
 
-use crate::server_data_source_error::DataSourceManagerError;
+//use crate::server_data_source_error::DataSourceManagerError;
+
+#[derive(Serialize, Deserialize, Error, Debug)]
+pub enum DataSourceManagerError {
+    #[error("DataSourceManager was given invalid data: {0}")]
+    InvalidData(String)
+}
 
 /// A specialized [`Result`](result::Result) type for [`DataSourceManager`] operations.
 /// 
