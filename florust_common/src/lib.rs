@@ -1,7 +1,6 @@
 use rocket::FromForm;
 
 pub mod server_plugin;
-pub mod server_data_source_error;
 
 use serde::{Serialize, Deserialize};
 use server_plugin::DataSourceManagerError;
