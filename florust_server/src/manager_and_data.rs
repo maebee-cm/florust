@@ -55,7 +55,7 @@ enum ManagerAndDataError {
     IndexOutOfBounds
 }
 
-type Result<T> = result::Result<T, ManagerAndDataError>;
+pub type Result<T> = result::Result<T, ManagerAndDataError>;
 
 #[async_trait]
 pub trait ManagerAndData: Send + Sync {
