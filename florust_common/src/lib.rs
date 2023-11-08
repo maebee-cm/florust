@@ -21,7 +21,7 @@ pub enum FlorustServerPluginError {
 }
 
 
-#[derive(FromForm)]
+#[derive(FromForm, Serialize, Deserialize)]
 pub struct UploadedData {
     pub data: Vec<u8>
 }
