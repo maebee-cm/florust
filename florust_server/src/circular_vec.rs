@@ -6,12 +6,12 @@ pub struct CircularVec<T> {
 }
 
 impl<T> CircularVec<T> {
-    pub fn new(max_size: usize) -> CircularVec<T>
+    pub fn new(max_size: usize, default: T) -> CircularVec<T>
     where
         T: Clone,
     {
         CircularVec {
-            vec: Vec::with_capacity(max_size),
+            vec: vec![default; max_size],
             start: 0,
             end: 0,
             max_size
