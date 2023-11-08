@@ -60,6 +60,8 @@ pub type Result<T> = result::Result<T, ManagerAndDataError>;
 
 #[async_trait]
 pub trait ManagerAndData: Send + Sync {
+    fn manager_id(&self) -> &'static str;
+
     async fn register(&self, id: String) -> Result<()>;
 
     async fn register_with_data(&self, id: String, data: &[u8]) -> Result<()>;
@@ -105,6 +107,10 @@ macro_rules! manager_and_data_impl {
 
         #[async_trait]
         impl ManagerAndData for $impl_for {
+            fn manager_id(&self) -> &'static str {
+                self.manager_id()
+            }
+
             async fn register(&self, id: String) -> Result<()> {
                 let mut lock = self.logged_data.write().await;
                 match lock.get(&id) {
