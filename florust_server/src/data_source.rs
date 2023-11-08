@@ -1,10 +1,7 @@
-use florust_common::{
-    server_data_source_error::DataSourceManagerError,
-    UploadedData
-};
+use florust_common::{UploadedData, FlorustServerPluginError};
 use rocket::{form::Form, post, put, Responder, State};
 
-use crate::FlorustState;
+use crate::{FlorustState, manager_and_data::ManagerAndDataError};
 
 #[derive(Responder)]
 pub enum DataSourceError {
@@ -13,25 +10,36 @@ pub enum DataSourceError {
     #[response(status = 404, content_type = "json")]
     NotFound(String),
     #[response(status = 409, content_type = "json")]
-    Conflict(String)
+    Conflict(String),
+    #[response(status = 500, content_type = "json")]
+    InternalError(String)
 }
 
-impl From<DataSourceManagerError> for DataSourceError {
-    fn from(value: DataSourceManagerError) -> Self {
+impl From<ManagerAndDataError> for DataSourceError {
+    fn from(value: ManagerAndDataError) -> Self {
         match &value {
-            DataSourceManagerError::DataSourceParseFailure(_) => Self::BadRequest(
-                serde_json::to_string(&value)
-                    .expect("Failed to serialize valid DataSourceManagerError")
-            ),
-            DataSourceManagerError::IdAlreadyExists => Self::Conflict(
-                serde_json::to_string(&value)
-                    .expect("Failed to serialize valid DataSourceManagerError")
-            ),
-            DataSourceManagerError::IdDoesntExist | DataSourceManagerError::DataSourceManagerDoesntExist => {
-                Self::NotFound(serde_json::to_string(&value)
-                    .expect("Failed to serialize valid DataSourceManagerError")
-                )
+            ManagerAndDataError::DataSourceManager(error) => match error {
+                FlorustServerPluginError::DataSourceAlreadyExists(_) | FlorustServerPluginError::DataSourceAlreadyDeregistered(_) => Self::Conflict(
+                    serde_json::to_string(&value)
+                        .expect("Failed to serialize valid ManagerAndDataError")
+                ),
+                FlorustServerPluginError::DataSourceDoesntExist(_) | FlorustServerPluginError::DataSourceManagerDoesntExist(_)=> Self::NotFound(
+                    serde_json::to_string(&value)
+                        .expect("Failed to serialize valid ManagerAndDataError")
+                ),
+                FlorustServerPluginError::DataSourceManager(_) => Self::BadRequest(
+                    serde_json::to_string(&value)
+                        .expect("Failed to serialize valid ManagerAndDataError")
+                ),
             },
+            ManagerAndDataError::NoData => Self::InternalError(
+                serde_json::to_string(&value)
+                    .expect("Failed to serialize valid ManagerAndDataError")
+            ),
+            ManagerAndDataError::IndexOutOfBounds => Self::InternalError(
+                serde_json::to_string(&value)
+                    .expect("Failed to serialize valid ManagerAndDataError")
+            ),
         }
     }
 }
