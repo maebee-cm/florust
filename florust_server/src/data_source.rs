@@ -1,7 +1,7 @@
 use florust_common::{UploadedData, FlorustServerPluginError};
-use rocket::{form::Form, post, put, Responder, State, serde::json::Json};
+use rocket::{form::Form, post, put, get, Responder, State, serde::json::Json};
 
-use crate::{FlorustState, manager_and_data::{ManagerAndDataError, self}};
+use crate::{FlorustState, manager_and_data::{ManagerAndDataError, DataType, self}};
 
 #[derive(Responder)]
 pub enum DataSourceError {
@@ -87,4 +87,14 @@ pub async fn upload_data(
 ) -> Result<OkResponder<()>, DataSourceError> {
 
     state_op_to_responder(state.update_data(&manager_id, &data_source_id, data.data.as_slice()).await)
+}
+
+#[get("/<manager_id>/<data_source_id>/<index>")]
+pub async fn get_data(
+    state: &State<FlorustState>,
+    manager_id: String,
+    data_source_id: String,
+    index: usize
+) -> Result<OkResponder<DataType>, DataSourceError> {
+    state_op_to_responder(state.get_data(&manager_id, &data_source_id, index).await)
 }
