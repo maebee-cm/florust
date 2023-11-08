@@ -86,7 +86,8 @@ fn launch() -> _ {
         routes![
             data_source::register,
             data_source::unregister,
-            data_source::upload_data,
+            data_source::json_upload_data,
+            data_source::form_upload_data,
             data_source::get_data
         ],
     )
