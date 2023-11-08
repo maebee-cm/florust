@@ -1,7 +1,7 @@
 use std::{collections::HashMap, result};
 
 use florust_common::{server_plugin::{IIntegerDataSourceManager, UIntegerDataSourceManager, FloatDataSourceManager}, FlorustServerPluginError};
-use rocket::{async_trait, tokio::sync::RwLock};
+use rocket::{async_trait, tokio::sync::RwLock, serde::{Serialize, Deserialize}};
 use thiserror::Error;
 
 use crate::circular_vec::CircularVec;
@@ -39,13 +39,14 @@ type UIntegerLoggedData = LoggedData<u64>;
 type FloatDataManager = Box<dyn FloatDataSourceManager>;
 type FloatLoggedData = LoggedData<f64>;
 
-enum DataType {
+pub enum DataType {
     IInteger(i64),
     UInteger(u64),
     Float(f64)
 }
 
-#[derive(Error, Debug)]
+#[derive(Serialize, Deserialize, Error, Debug)]
+#[serde(crate = "rocket::serde")]
 pub enum ManagerAndDataError {
     #[error("Data source manager returned error: {0}")]
     DataSourceManager(FlorustServerPluginError),
@@ -105,10 +106,10 @@ macro_rules! manager_and_data_impl {
         #[async_trait]
         impl ManagerAndData for $impl_for {
             async fn register(&self, id: String) -> Result<()> {
-                let lock = self.logged_data.write().await;
+                let mut lock = self.logged_data.write().await;
                 match lock.get(&id) {
                     Some(data_source) => {
-                        let data_source = data_source.write().await;
+                        let mut data_source = data_source.write().await;
 
                         if data_source.is_registered() {
                             return Err(
@@ -126,7 +127,7 @@ macro_rules! manager_and_data_impl {
                         *data_source = DataSourceStatus::RegisteredNoData;
                     }
                     None => {
-                        self.manager.register(id).await.map_err(|err| {
+                        self.manager.register(id.clone()).await.map_err(|err| {
                             ManagerAndDataError::DataSourceManager(
                                 FlorustServerPluginError::DataSourceManager(err)
                             )
@@ -139,10 +140,10 @@ macro_rules! manager_and_data_impl {
             }
 
             async fn register_with_data(&self, id: String, data: &[u8]) -> Result<()> {
-                let lock = self.logged_data.write().await;
+                let mut lock = self.logged_data.write().await;
                 match lock.get(&id) {
                     Some(data_source) => {
-                        let data_source = data_source.write().await;
+                        let mut data_source = data_source.write().await;
 
                         if data_source.is_registered() {
                             return Err(
@@ -160,7 +161,7 @@ macro_rules! manager_and_data_impl {
                         *data_source = DataSourceStatus::RegisteredNoData;
                     }
                     None => {
-                        self.manager.register_with_data(id, data).await.map_err(|err| {
+                        self.manager.register_with_data(id.clone(), data).await.map_err(|err| {
                             ManagerAndDataError::DataSourceManager(
                                 FlorustServerPluginError::DataSourceManager(err)
                             )
@@ -173,8 +174,8 @@ macro_rules! manager_and_data_impl {
             }
 
             async fn deregister(&self, id: &str) -> Result<()> {
-                let lock = self.logged_data.write().await;
-                let status = lock
+                let mut lock = self.logged_data.write().await;
+                let mut status = lock
                     .get(id)
                     .ok_or(
                         ManagerAndDataError::DataSourceManager(
@@ -198,20 +199,24 @@ macro_rules! manager_and_data_impl {
                         )
                     })?;
 
-                match *status {
-                    DataSourceStatus::Registered(data) => *status = DataSourceStatus::Deregistered(data),
-                    DataSourceStatus::RegisteredNoData => {
-                        lock.remove(id);
-                    },
+                let tmp = std::mem::replace(&mut *status, DataSourceStatus::RegisteredNoData);
+                *status = match tmp {
+                    DataSourceStatus::Registered(data) => DataSourceStatus::Deregistered(data),
+                    DataSourceStatus::RegisteredNoData => DataSourceStatus::RegisteredNoData,
                     DataSourceStatus::Deregistered(_) => unreachable!("DataSourceStatus is Deregistered despite check saying it isn't.")
                 };
+
+                if let DataSourceStatus::RegisteredNoData = *status {
+                    drop(status);
+                    lock.remove(id);
+                }
 
                 Ok(())
             }
 
             async fn deregister_with_data(&self, id: &str, data: &[u8]) -> Result<()> {
-                let lock = self.logged_data.write().await;
-                let status = lock
+                let mut lock = self.logged_data.write().await;
+                let mut status = lock
                     .get(id)
                     .ok_or(
                         ManagerAndDataError::DataSourceManager(
@@ -235,13 +240,17 @@ macro_rules! manager_and_data_impl {
                         )
                     })?;
 
-                match *status {
-                    DataSourceStatus::Registered(data) => *status = DataSourceStatus::Deregistered(data),
-                    DataSourceStatus::RegisteredNoData => {
-                        lock.remove(id);
-                    },
+                let tmp = std::mem::replace(&mut *status, DataSourceStatus::RegisteredNoData);
+                *status = match tmp {
+                    DataSourceStatus::Registered(data) => DataSourceStatus::Deregistered(data),
+                    DataSourceStatus::RegisteredNoData => DataSourceStatus::RegisteredNoData,
                     DataSourceStatus::Deregistered(_) => unreachable!("DataSourceStatus is Deregistered despite check saying it isn't.")
                 };
+
+                if let DataSourceStatus::RegisteredNoData = *status {
+                    drop(status);
+                    lock.remove(id);
+                }
 
                 Ok(())
             }
@@ -285,18 +294,21 @@ macro_rules! manager_and_data_impl {
             }
 
             async fn get_data(&self, id: &str, index: usize) -> Result<DataType> {
-                Ok($data_type(*self.logged_data.read().await
-                    .get(id)
-                    .ok_or(
-                        ManagerAndDataError::DataSourceManager(
-                            FlorustServerPluginError::DataSourceDoesntExist(id.to_string())
-                        )
-                    )?
-                    .read().await
-                    .data_or_err(|| ManagerAndDataError::NoData)?
-                    .get(index)
-                    .ok_or(ManagerAndDataError::IndexOutOfBounds)?
-                ))
+                Ok(
+                    $data_type(
+                        *self.logged_data.read().await
+                            .get(id)
+                            .ok_or(
+                                ManagerAndDataError::DataSourceManager(
+                                    FlorustServerPluginError::DataSourceDoesntExist(id.to_string())
+                                )
+                            )?
+                            .read().await
+                            .data_or_err(|| ManagerAndDataError::NoData)?
+                            .get(index)
+                            .ok_or(ManagerAndDataError::IndexOutOfBounds)?
+                    )
+                )
             }
         }
     };
