@@ -96,7 +96,7 @@ pub struct FloatManagerAndData {
 }
 
 macro_rules! manager_and_data_impl {
-    ($impl_for:ident, $data_manager:ty, $data_type:path) => {
+    ($impl_for:ident, $data_manager:ty, $default_val:literal, $data_type:path) => {
         impl $impl_for {
             pub fn new(manager: $data_manager, max_logged_data_size: usize) -> $impl_for {
                 $impl_for {
@@ -284,7 +284,7 @@ macro_rules! manager_and_data_impl {
 
                 match &mut *data_source {
                     DataSourceStatus::RegisteredNoData => {
-                        let mut logged_data = CircularVec::new(self.max_logged_data_size);
+                        let mut logged_data = CircularVec::new(self.max_logged_data_size, $default_val);
                         logged_data.append(val);
                         *data_source = DataSourceStatus::Registered(logged_data);
                     },
@@ -322,6 +322,6 @@ macro_rules! manager_and_data_impl {
     };
 }
 
-manager_and_data_impl!(IIntegerManagerAndData, IIntegerDataManager, DataType::IInteger);
-manager_and_data_impl!(UIntegerManagerAndData, UIntegerDataManager, DataType::UInteger);
-manager_and_data_impl!(FloatManagerAndData, FloatDataManager, DataType::Float);
+manager_and_data_impl!(IIntegerManagerAndData, IIntegerDataManager, 0, DataType::IInteger);
+manager_and_data_impl!(UIntegerManagerAndData, UIntegerDataManager, 0, DataType::UInteger);
+manager_and_data_impl!(FloatManagerAndData, FloatDataManager, 0.0, DataType::Float);
