@@ -39,6 +39,8 @@ type UIntegerLoggedData = LoggedData<u64>;
 type FloatDataManager = Box<dyn FloatDataSourceManager>;
 type FloatLoggedData = LoggedData<f64>;
 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub enum DataType {
     IInteger(i64),
     UInteger(u64),
