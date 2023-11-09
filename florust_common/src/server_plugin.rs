@@ -56,18 +56,15 @@ pub trait DataSourceManager<T>: Sync + Send {
 
 /// One of three specialized types of [`DataSourceManager`] that is responsible for producing data of
 /// type [`i64`] from data provided by a data source.
-pub trait IIntegerDataSourceManager: DataSourceManager<i64> + Sync + Send {
-}
+pub type IIntegerDataSourceManager = dyn DataSourceManager<i64>;
 
 /// One of three specialized types of [`DataSourceManager`] that is responsible for producing data of
 /// type [`u64`] from data provided by a data source.
-pub trait UIntegerDataSourceManager: DataSourceManager<u64> + Sync + Send {
-}
+pub type UIntegerDataSourceManager = dyn DataSourceManager<u64>;
 
 /// One of three specialized types of [`DataSourceManager`] that is responsible for producing data of
 /// type [`f64`] from data provided by a data source.
-pub trait FloatDataSourceManager: DataSourceManager<f64> + Sync + Send {
-}
+pub type FloatDataSourceManager = dyn DataSourceManager<f64>;
 
 /// A type representing a double boxed trait. This type is double boxed as a boxed trait object is a fat
 /// pointer which would be difficult to transport across FFI boundaries. Boxing the box resolves this issue
@@ -75,10 +72,10 @@ pub trait FloatDataSourceManager: DataSourceManager<f64> + Sync + Send {
 pub type FFIBoxTrait<T> = Box<Box<T>>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`IIntegerDataSourceManager`].
-pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn IIntegerDataSourceManager>;
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<IIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`UIntegerDataSourceManager`].
-pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn UIntegerDataSourceManager>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<UIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`FloatDataSourceManager`].
-pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<dyn FloatDataSourceManager>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<FloatDataSourceManager>;
