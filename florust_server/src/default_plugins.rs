@@ -1,6 +1,6 @@
 use std::array::TryFromSliceError;
 
-use florust_common::server_plugin::{DataSourceManager, self, DataSourceManagerError, IIntegerDataSourceManager, UIntegerDataSourceManager, FloatDataSourceManager};
+use florust_common::server_plugin::{DataSourceManager, self, DataSourceManagerError};
 use rocket::async_trait;
 
 pub struct DefaultIIntegerDataManager;
@@ -34,8 +34,6 @@ impl DataSourceManager<i64> for DefaultIIntegerDataManager {
     }
 }
 
-impl IIntegerDataSourceManager for DefaultIIntegerDataManager{}
-
 pub struct DefaultUIntegerDataManager;
 
 #[async_trait]
@@ -67,8 +65,6 @@ impl DataSourceManager<u64> for DefaultUIntegerDataManager {
     }
 }
 
-impl UIntegerDataSourceManager for DefaultUIntegerDataManager{}
-
 pub struct DefaultFloatDataManager;
 
 #[async_trait]
@@ -99,5 +95,3 @@ impl DataSourceManager<f64> for DefaultFloatDataManager {
         Ok(f64::from_be_bytes(data))
     }
 }
-
-impl FloatDataSourceManager for DefaultFloatDataManager{}
