@@ -30,13 +30,13 @@ impl<T> DataSourceStatus<T> where T: Send + Sync {
 
 type LoggedData<T> = RwLock<DataSourceStatus<T>>;
 
-type IIntegerDataManager = Box<dyn IIntegerDataSourceManager>;
+type IIntegerDataManager = Box<IIntegerDataSourceManager>;
 type IIntegerLoggedData = LoggedData<i64>;
 
-type UIntegerDataManager = Box<dyn UIntegerDataSourceManager>;
+type UIntegerDataManager = Box<UIntegerDataSourceManager>;
 type UIntegerLoggedData = LoggedData<u64>;
 
-type FloatDataManager = Box<dyn FloatDataSourceManager>;
+type FloatDataManager = Box<FloatDataSourceManager>;
 type FloatLoggedData = LoggedData<f64>;
 
 #[derive(Serialize, Deserialize)]
