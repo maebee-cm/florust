@@ -1,12 +1,23 @@
 mod circular_vec;
 mod data_source;
 mod manager_and_data;
+#[cfg(any(feature = "iinteger_default_plugin", feature = "uinteger_default_plugin", feature = "float_default_plugin"))]
+mod default_plugins;
 
-use manager_and_data::{ManagerAndDataError, DataType};
+use manager_and_data::{ManagerAndData, ManagerAndDataError, DataType, IIntegerManagerAndData, UIntegerManagerAndData, FloatManagerAndData};
 use rocket::{launch, routes};
 use std::{collections::HashMap, sync::Arc};
 
 use florust_common::FlorustServerPluginError;
+
+#[cfg(feature = "iinteger_default_plugin")]
+use default_plugins::DefaultIIntegerDataManager;
+
+#[cfg(feature = "uinteger_default_plugin")]
+use default_plugins::DefaultUIntegerDataManager;
+
+#[cfg(feature = "float_default_plugin")]
+use default_plugins::DefaultFloatDataManager;
 
 type BoxedManagerAndData = Box<dyn manager_and_data::ManagerAndData>;
 
@@ -77,8 +88,34 @@ impl FlorustState {
 
 #[launch]
 fn launch() -> _ {
+    let mut managers = HashMap::new();
+
+    #[cfg(feature = "iinteger_default_plugin")] {
+        let iinteger_manager = Box::new(IIntegerManagerAndData::new(
+            Box::new(DefaultIIntegerDataManager{}) as _,
+            10
+        )) as BoxedManagerAndData;
+        managers.insert(iinteger_manager.manager_id(), iinteger_manager);
+    }
+
+    #[cfg(feature = "uinteger_default_plugin")] {
+        let uinteger_manager = Box::new(UIntegerManagerAndData::new(
+            Box::new(DefaultUIntegerDataManager{}) as _,
+            10
+        ));
+        managers.insert(uinteger_manager.manager_id(), uinteger_manager);
+    }
+
+    #[cfg(feature = "float_default_plugin")] {
+        let float_manager = Box::new(FloatManagerAndData::new(
+            Box::new(DefaultFloatDataManager{}) as _,
+            10
+        ));
+        managers.insert(float_manager.manager_id(), float_manager);
+    }
+
     let florust_state = FlorustState {
-        managers_and_data: Arc::new(HashMap::new()),
+        managers_and_data: Arc::new(managers),
     };
 
     rocket::build().manage(florust_state).mount(
