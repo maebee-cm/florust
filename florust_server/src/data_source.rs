@@ -1,4 +1,4 @@
-use florust_common::{UploadedData, FlorustServerPluginError};
+use florust_common::{UploadedData, server::FlorustServerPluginError};
 use rocket::{form::Form, post, put, get, Responder, State, serde::json::Json};
 
 use crate::{FlorustState, manager_and_data::{ManagerAndDataError, DataType, self}};

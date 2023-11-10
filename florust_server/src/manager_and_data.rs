@@ -1,6 +1,6 @@
 use std::{collections::HashMap, result};
 
-use florust_common::{server_plugin::{IIntegerDataSourceManager, UIntegerDataSourceManager, FloatDataSourceManager}, FlorustServerPluginError};
+use florust_common::server::{IIntegerDataSourceManager, UIntegerDataSourceManager, FloatDataSourceManager, FlorustServerPluginError};
 use rocket::{async_trait, tokio::sync::RwLock, serde::{Serialize, Deserialize}};
 use thiserror::Error;
 
