@@ -8,7 +8,7 @@ use manager_and_data::{ManagerAndData, ManagerAndDataError, DataType, IIntegerMa
 use rocket::{launch, routes};
 use std::{collections::HashMap, sync::Arc};
 
-use florust_common::FlorustServerPluginError;
+use florust_common::server::FlorustServerPluginError;
 
 #[cfg(feature = "iinteger_default_plugin")]
 use default_plugins::DefaultIIntegerDataManager;

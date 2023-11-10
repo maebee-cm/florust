@@ -1,6 +1,6 @@
 use std::array::TryFromSliceError;
 
-use florust_common::server_plugin::{DataSourceManager, self, DataSourceManagerError};
+use florust_common::server::{DataSourceManager, self, DataSourceManagerError};
 use rocket::async_trait;
 
 pub struct DefaultIIntegerDataManager;
@@ -11,23 +11,23 @@ impl DataSourceManager<i64> for DefaultIIntegerDataManager {
         "FlorustDefaultIIntegerDataManager"
     }
 
-    async fn register(&self, _id: String) -> server_plugin::Result<()> {
+    async fn register(&self, _id: String) -> server::Result<()> {
         Ok(())
     }
 
-    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister(&self, _id: &str) -> server_plugin::Result<()> {
+    async fn deregister(&self, _id: &str) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn update_data(&self, _id: &str, data: &[u8]) -> server_plugin::Result<i64> {
+    async fn update_data(&self, _id: &str, data: &[u8]) -> server::Result<i64> {
         let data = data.try_into()
             .map_err(|err:  TryFromSliceError| DataSourceManagerError::InvalidData(err.to_string()))?;
         Ok(i64::from_be_bytes(data))
@@ -42,23 +42,23 @@ impl DataSourceManager<u64> for DefaultUIntegerDataManager {
         "FlorustDefaultUIntegerDataManager"
     }
 
-    async fn register(&self, _id: String) -> server_plugin::Result<()> {
+    async fn register(&self, _id: String) -> server::Result<()> {
         Ok(())
     }
 
-    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister(&self, _id: &str) -> server_plugin::Result<()> {
+    async fn deregister(&self, _id: &str) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn update_data(&self, _id: &str, data: &[u8]) -> server_plugin::Result<u64> {
+    async fn update_data(&self, _id: &str, data: &[u8]) -> server::Result<u64> {
         let data = data.try_into()
             .map_err(|err:  TryFromSliceError| DataSourceManagerError::InvalidData(err.to_string()))?;
         Ok(u64::from_be_bytes(data))
@@ -73,23 +73,23 @@ impl DataSourceManager<f64> for DefaultFloatDataManager {
         "FlorustDefaultFloatDataManager"
     }
 
-    async fn register(&self, _id: String) -> server_plugin::Result<()> {
+    async fn register(&self, _id: String) -> server::Result<()> {
         Ok(())
     }
 
-    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn register_with_data(&self, _id: String, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister(&self, _id: &str) -> server_plugin::Result<()> {
+    async fn deregister(&self, _id: &str) -> server::Result<()> {
         Ok(())
     }
 
-    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server_plugin::Result<()> {
+    async fn deregister_with_data(&self, _id: &str, _data: &[u8]) -> server::Result<()> {
         Ok(())
     }
 
-    async fn update_data(&self, _id: &str, data: &[u8]) -> server_plugin::Result<f64> {
+    async fn update_data(&self, _id: &str, data: &[u8]) -> server::Result<f64> {
         let data = data.try_into()
             .map_err(|err:  TryFromSliceError| DataSourceManagerError::InvalidData(err.to_string()))?;
         Ok(f64::from_be_bytes(data))
