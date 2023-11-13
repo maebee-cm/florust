@@ -86,10 +86,10 @@ pub type FloatDataSourceManager = dyn DataSourceManager<f64>;
 pub type FFIBoxTrait<T> = Box<Box<T>>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`IIntegerDataSourceManager`].
-pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<IIntegerDataSourceManager>;
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<IIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`UIntegerDataSourceManager`].
-pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<UIntegerDataSourceManager>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<UIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`FloatDataSourceManager`].
-pub type CreateFloatDataSourceManager = unsafe extern "C" fn() -> FFIBoxTrait<FloatDataSourceManager>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<FloatDataSourceManager>;
