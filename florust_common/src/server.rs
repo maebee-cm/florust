@@ -110,13 +110,13 @@ pub type FloatDataSourceManager = dyn DataSourceManager<f64>;
 /// A type representing a double boxed trait. This type is double boxed as a boxed trait object is a fat
 /// pointer which would be difficult to transport across FFI boundaries. Boxing the box resolves this issue
 /// by making it a normal sized pointer.
-pub type FFIBoxTrait<T> = Box<Box<T>>;
+pub type FFIResult<T> = Box<Result<Box<T>>>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`IIntegerDataSourceManager`].
-pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<IIntegerDataSourceManager>;
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<IIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`UIntegerDataSourceManager`].
-pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<UIntegerDataSourceManager>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<UIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`FloatDataSourceManager`].
-pub type CreateFloatDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIBoxTrait<FloatDataSourceManager>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<FloatDataSourceManager>;
