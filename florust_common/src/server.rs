@@ -41,16 +41,34 @@ pub trait DataSourceManager<T>: Sync + Send {
 
     /// Called when a new data source registers itself to the id belonging to the data source manager.
     /// 
+    /// Florust will handle keeping track of what data sources are registered to your data source manager's
+    /// id, and will never call this method if the data source is already registered. This method only
+    /// exists for data source managers who need to perform some sort of operation when a new source is
+    /// registered to them, as such, it is perfectly acceptable to leave this implementation as a stub that
+    /// just immediately returns `Ok(())`
+    /// 
     /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
     async fn register(&self, id: String) -> Result<()>;
 
     /// Called when a new data source registers itself to the id belonging to the data source manager.
     /// This method is chosen if the data source provided additional info with the registration request.
     /// 
+    /// Florust will handle keeping track of what data sources are registered to your data source manager's
+    /// id, and will never call this method if the data source is already registered. This method only
+    /// exists for data source managers who need to perform some sort of operation when a new source is
+    /// registered to them, as such, it is perfectly acceptable to leave this implementation as a stub that
+    /// just immediately returns `Ok(())`
+    /// 
     /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
     async fn register_with_data(&self, id: String, data: &[u8]) -> Result<()>;
 
     /// Called when a data source requests to be deregistered from the data source manager.
+    /// 
+    /// Florust will handle keeping track of what data sources are registered to your data source manager's
+    /// id, and will never call this method if the data source was never registered or is already deregistered.
+    /// This method only exists for data source managers who need to perform some sort of operation when a new
+    /// source is deregistered from them, as such, it is perfectly acceptable to leave this implementation as a
+    /// stub that just immediately returns `Ok(())`
     /// 
     /// Returns the unit type if no errors occurred or a [`DataSourceManagerError`] in case of an error.
     async fn deregister(&self, id: &str) -> Result<()>;
@@ -58,11 +76,20 @@ pub trait DataSourceManager<T>: Sync + Send {
     /// Called when a data source requests to be deregistered from the data source manager. This method
     /// is chosen if the data source provided additional info with the deregistration request.
     /// 
+    /// Florust will handle keeping track of what data sources are registered to your data source manager's
+    /// id, and will never call this method if the data source was never registered or is already deregistered.
+    /// This method only exists for data source managers who need to perform some sort of operation when a new
+    /// source is deregistered from them, as such, it is perfectly acceptable to leave this implementation as a
+    /// stub that just immediately returns `Ok(())`
+    /// 
     /// Returns the unit type if no errors occurred, or a [`DataSourceManagerError`] in case of an error.
     async fn deregister_with_data(&self, id: &str, data: &[u8]) -> Result<()>;
 
-    /// Called when a data source has posted an update. provides the raw data that the data source
+    /// Called when a data source has posted an update. Provides the raw data that the data source
     /// has sent to the Florust server.
+    /// 
+    /// Florust will handle keeping track of what data sources are registered to your data source manager's
+    /// id, and will never call this method if the data source was never registered or is already deregistered.
     /// 
     /// Returns the value parsed from the data, or a [`DataSourceManagerError`] in case of an error.
     async fn update_data(&self, id: &str, data: &[u8]) -> Result<T>;
