@@ -27,14 +27,13 @@ The config file is a TOML file, it requires one section, the `plugin` section. Y
 
 All required parameters must be placed in a section labeled `plugin`. The required parameters are described below.
 
-| name        | description                                                  | default value        | accepted values |
-| ----------- | ------------------------------------------------------------ | -------------------- | --------------- |
-| name        | name of the plugin                                           | N/A                  | any             |
-| lib         | name of the file                                             | N/A                  | any             |
-| max_data    | maximum number of data points stored per data source         | 10                   | any             |
-| data_type   | the type of data this plugin will be reporting               | N/A                  | [i64, u64, f64] |
-| create_func | name of the function that will be used to create the manager | depends on data_type | any             |
-| need_config | whether or not the plugin needs the config file              | false                | [true, false]   |
+| name        | description                                                  | default value        | accepted values                 |
+| ----------- | ------------------------------------------------------------ | -------------------- | ------------------------------- |
+| name        | name of the plugin                                           | N/A                  | string                          |
+| lib         | name of the file                                             | N/A                  | string                          |
+| max_data    | maximum number of data points stored per data source         | 10                   | positive integer                |
+| data_type   | the type of data this plugin will be reporting               | N/A                  | string, one of: [i64, u64, f64] |
+| create_func | name of the function that will be used to create the manager | depends on data_type | string                          |
 
 ### Example config file
 
