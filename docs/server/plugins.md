@@ -16,8 +16,8 @@ Creating custom plugins is very simple, and the steps for which are as follows:
 4. Compile the plugin as a dynamic library.
 5. In the same working directory that the Florust server would be running in, create a folder called `plugins`
 6. Create a folder inside `plugins`, ideally the folder name should reflect the name of your plugin.
-7. Create `plugin.conf` file inside your folder, this will be the file that holds info for how your plugin should be configured. Formatting for this config file is described later in this document.
-8. Put your dynamic library in the same folder as the `plugin.conf` file.
+7. Create `plugin.toml` file inside your folder, this will be the file that holds info for how your plugin should be configured. Formatting for this config file is described later in this document.
+8. Put your dynamic library in the same folder as the `plugin.toml` file.
 
 ## Config file
 
