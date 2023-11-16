@@ -13,6 +13,9 @@ tera = "1.19.1"
 florust_common = { path = "../florust_common/" }
 thiserror = "1.0.50"
 toml = "0.8.8"
+log = "0.4.20"
+simple_logger = "4.2.0"
+libloading = "0.8.1"
 
 [features]
 default = ["iinteger_default_plugin", "uinteger_default_plugin", "float_default_plugin"]

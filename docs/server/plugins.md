@@ -16,8 +16,8 @@ Creating custom plugins is very simple, and the steps for which are as follows:
 4. Compile the plugin as a dynamic library.
 5. In the same working directory that the Florust server would be running in, create a folder called `plugins`
 6. Create a folder inside `plugins`, ideally the folder name should reflect the name of your plugin.
-7. Create `plugin.conf` file inside your folder, this will be the file that holds info for how your plugin should be configured. Formatting for this config file is described later in this document.
-8. Put your dynamic library in the same folder as the `plugin.conf` file.
+7. Create `plugin.toml` file inside your folder, this will be the file that holds info for how your plugin should be configured. Formatting for this config file is described later in this document.
+8. Put your dynamic library in the same folder as the `plugin.toml` file.
 
 ## Config file
 
@@ -27,14 +27,13 @@ The config file is a TOML file, it requires one section, the `plugin` section. Y
 
 All required parameters must be placed in a section labeled `plugin`. The required parameters are described below.
 
-| name        | description                                                  | default value        | accepted values |
-| ----------- | ------------------------------------------------------------ | -------------------- | --------------- |
-| name        | name of the plugin                                           | N/A                  | any             |
-| lib         | name of the file                                             | N/A                  | any             |
-| max_data    | maximum number of data points stored per data source         | 10                   | any             |
-| data_type   | the type of data this plugin will be reporting               | N/A                  | [i64, u64, f64] |
-| create_func | name of the function that will be used to create the manager | depends on data_type | any             |
-| need_config | whether or not the plugin needs the config file              | false                | [true, false]   |
+| name        | description                                                  | default value        | accepted values                 |
+| ----------- | ------------------------------------------------------------ | -------------------- | ------------------------------- |
+| name        | name of the plugin                                           | N/A                  | string                          |
+| lib         | name of the file                                             | N/A                  | string                          |
+| max_data    | maximum number of data points stored per data source         | 10                   | positive integer                |
+| data_type   | the type of data this plugin will be reporting               | N/A                  | string, one of: [i64, u64, f64] |
+| create_func | name of the function that will be used to create the manager | depends on data_type | string                          |
 
 ### Example config file
 
