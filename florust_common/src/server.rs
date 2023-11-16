@@ -113,10 +113,10 @@ pub type FloatDataSourceManager = dyn DataSourceManager<f64>;
 pub type FFIResult<T> = Box<Result<Box<T>>>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`IIntegerDataSourceManager`].
-pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<IIntegerDataSourceManager>;
+pub type CreateIIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::map::Map<String, toml::Value>>>) -> FFIResult<IIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`UIntegerDataSourceManager`].
-pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<UIntegerDataSourceManager>;
+pub type CreateUIntegerDataSourceManager = unsafe extern "C" fn(Box<Option<toml::map::Map<String, toml::Value>>>) -> FFIResult<UIntegerDataSourceManager>;
 
 /// A function that returns a [`FFIBoxTrait`] which contains an [`FloatDataSourceManager`].
-pub type CreateFloatDataSourceManager = unsafe extern "C" fn(Box<Option<toml::Table>>) -> FFIResult<FloatDataSourceManager>;
+pub type CreateFloatDataSourceManager = unsafe extern "C" fn(Box<Option<toml::map::Map<String, toml::Value>>>) -> FFIResult<FloatDataSourceManager>;
